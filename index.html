@@ -54,18 +54,20 @@ button{font:inherit;color:#111;cursor:pointer}
 #pv{width:220px;height:260px;border:4px solid #111;background:#fbf9f3;box-shadow:5px 5px 0 #111}
 #nama{font:inherit;font-size:24px;border:3px solid #111;border-radius:4px;padding:5px 10px;width:100%;background:#fffdf6;margin:8px 0}
 /* peta */
-#map{position:fixed;inset:0;z-index:35;display:flex;overflow:auto;padding:10px}
+#map{position:fixed;inset:0;z-index:35;display:flex;overflow:auto;padding:10px;touch-action:pan-x pan-y}
 #mpb{width:min(1000px,98vw);padding:14px 18px;margin:auto}
 #mpb h2{margin:0;font-size:32px}
-#mapw{position:relative;border:3px solid #111;margin:8px 0;background:#eaf1f0}
-#msvg{display:block;width:100%;height:auto}
-.mk{position:absolute;transform:translate(-50%,-50%)}
-.pin{position:relative;width:34px;height:34px;border-radius:50%;border:3px solid #111;background:#fff;font-size:17px;box-shadow:2px 2px 0 #111;padding:0;line-height:1}
+#mapw{position:relative;border:3px solid #111;margin:8px 0;background:#4b7fd1;overflow:hidden;border-radius:4px}
+#mimg{display:block;width:100%;height:auto;pointer-events:none;user-select:none}
+.mk{position:absolute;transform:translate(-50%,-50%);z-index:5}
+.pin{position:relative;width:36px;height:36px;border-radius:50%;border:3px solid #111;background:#fff;font-size:17px;font-weight:bold;box-shadow:2px 2px 0 #111;padding:0;line-height:1;cursor:pointer;z-index:6}
+.pin:hover{transform:scale(1.15);background:#fff7da}
+.pin:active{transform:scale(0.95)}
 .pin.go{animation:pul 1.1s infinite}
-.pin.dn{background:#9fd8a0}.pin.lk{background:#ddd;color:#777}
+.pin.dn{background:#9fd8a0}.pin.lk{background:#e5e5e5;color:#555}
 @keyframes pul{50%{transform:scale(1.18)}}
-.pl{position:absolute;left:50%;transform:translateX(-50%);top:38px;font-size:14px;background:#fff;border:2px solid #111;padding:0 6px;white-space:nowrap;pointer-events:none}
-.pl.up{top:auto;bottom:38px}
+.pl{position:absolute;left:50%;transform:translateX(-50%);top:40px;font-size:14px;font-weight:bold;background:#fff;border:2px solid #111;border-radius:3px;padding:1px 7px;white-space:nowrap;pointer-events:none;box-shadow:2px 2px 0 rgba(17,17,17,.85);z-index:7}
+.pl.up{top:auto;bottom:40px}
 #sandi{font-family:'Courier Prime',monospace;font-size:17px;line-height:1.35}
 /* judul daerah */
 #rt{position:fixed;left:50%;top:20%;z-index:15;text-align:center;pointer-events:none;opacity:0}
@@ -144,10 +146,11 @@ body.np #js,body.np #ab{display:none!important}
 /* ============================================================
    KARSALOKA: PETUALANGAN DETEKTIF BUDAYA
    ------------------------------------------------------------
-   SPRITE PNG DARI DEV: isi CS.src dengan nama file, misalnya 'karsa.png'.
-   Gambar 1 frame, menghadap KANAN, otomatis dibalik saat jalan ke kiri.
-   w/h = ukuran di dunia game, ay = jarak telapak kaki dari atas gambar.
+   FILE GAMBAR PETA: Pastikan file gambar peta berada sejajar
+   dengan index.html dengan nama 'karsaloka-map.jpeg'
    ============================================================ */
+const MAP_IMG = 'karsaloka-map.jpeg';
+
 const CS={src:'',w:48,h:64,ay:60,scale:1,img:null,ok:false};
 (function(){if(!CS.src)return;const im=new Image();im.onload=()=>{CS.img=im;CS.ok=true;};im.src=CS.src;})();
 
@@ -171,7 +174,6 @@ function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=innerWidth;H=inne
 addEventListener('resize',resize);resize();
 
 let WW=2000,WH=1000;
-/* Karakter pemain TETAP, hanya nama yang bisa diisi */
 const cfg={name:'Detektif',hair:'pendek',hairc:'#1b1b1b',hat:'topi',shirt:'#4a90a4',scarf:'#d9534f',skin:'#f1c27d'};
 let mode='menu',scene='ui',stage=0,free=false,t=0,R=null,NPC=null,MM='menu';
 let DONE={},ST={},PRO=false,EPI=false;
@@ -188,14 +190,14 @@ function save(){try{localStorage.setItem('karsaloka2',JSON.stringify({n:cfg.name
 const cnt=()=>Object.keys(DONE).filter(k=>DONE[k]).length;
 
 /* ============================================================
-   DATA DAERAH (peta, ornamen, dan tantangan berbeda per daerah)
+   DATA DAERAH (Koordinat mx & my sudah dipaskan ke gambar baru)
    ============================================================ */
 let PR=[],PID={},SOLS=[],RS={got:{},talked:{},ri:0};
 const WIT=(name,skin,shirt,hair,hairc,hat)=>({name,skin,shirt,scarf:'#f2c14e',hair,hairc,hat,npc:true,dir:'down',expr:'ramah',t:0});
 const ITM=(id,x,y,c,txt)=>({id,t:'item',x,y,c,txt,vis:()=>stage===1&&!RS.got[id]});
 const REG=[
-/* ---------------- YOGYAKARTA: alun-alun, regol, tugu ---------------- */
-{id:'yogya',nama:'Yogyakarta',kasus:'Misteri Resep Wedang Uwuh Keraton',mx:49.5,my:67.2,lb:'dn',lab:'Susun kata · Urutkan resep',
+/* ---------------- YOGYAKARTA ---------------- */
+{id:'yogya',nama:'Yogyakarta',kasus:'Misteri Resep Wedang Uwuh Keraton',mx:35.8,my:73.5,lb:'dn',lab:'Susun kata · Urutkan resep',
  npc:{name:'Mbah Loka',skin:'#c99a6e',shirt:'#7c8aa0',scarf:'#8a5a44',hair:'pendek',hairc:'#d6d6d6',hat:'blangkon',lurik:true,stache:true},
  w:2000,h:1000,spawn:[1000,900],ground:'alun',style:'joglo',gate:'regol',roof:'#a8482f',roof2:'#b95a3a',grass:'143,184,120',canopy:'#80b077',path:'#ebe1c8',fl:['#f4a3b5','#f9d36b','#b7a4e3','#fff'],
  hall:'BALAI KARSALOKA',
@@ -226,8 +228,8 @@ const REG=[
    win:[{w:'',t:'Klik! Gembok terbuka. Di dalam peti ada gulungan berisi resep asli Wedang Uwuh Keraton.'},{w:'p',f:'senang',t:'Ketemu! Saatnya lapor ke Mbah Loka.'}]}
  ]},
 
-/* ---------------- BALI: kompleks pura dua halaman ---------------- */
-{id:'bali',nama:'Bali',kasus:'Misteri Naskah Lontar Usada',mx:62,my:67.2,lb:'up',lab:'Pasangkan arah · Jalur doa',
+/* ---------------- BALI ---------------- */
+{id:'bali',nama:'Bali',kasus:'Misteri Naskah Lontar Usada',mx:48.8,my:76.5,lb:'dn',lab:'Pasangkan arah · Jalur doa',
  npc:{name:'Bli Made',skin:'#d9a066',shirt:'#f2f2f2',scarf:'#f2c14e',hair:'pendek',hairc:'#1b1b1b',hat:'udeng'},
  w:2400,h:1000,spawn:[1200,900],ground:'pura',style:'bale',gate:'bentar',roof:'#6b5a3a',roof2:'#7d6a45',grass:'120,190,140',canopy:'#6fae8a',path:'#e8dcc0',fl:['#fff','#f9d36b','#fff','#f4a3b5'],
  hall:'BALE BANJAR',
@@ -263,8 +265,8 @@ const REG=[
    win:[{w:'',t:'Di pelinggih terakhir terdengar bunyi klik dari Meja Sesaji. Sebuah ruang rahasia terbuka dan gulungan lontar muncul.'},{w:'p',f:'senang',t:'Ketemu! Saatnya lapor ke Bli Made.'}]}
  ]},
 
-/* ---------------- JAWA BARAT: sawah terasering, sungai, jembatan bambu ---------------- */
-{id:'jabar',nama:'Jawa Barat',kasus:'Misteri Nada Angklung Buhun',mx:38,my:64.6,lb:'up',lab:'Wawancara saksi · Nada angklung',
+/* ---------------- JAWA BARAT ---------------- */
+{id:'jabar',nama:'Jawa Barat',kasus:'Misteri Nada Angklung Buhun',mx:27.5,my:69.5,lb:'up',lab:'Wawancara saksi · Nada angklung',
  npc:{name:'Teh Nia',skin:'#e8b98a',shirt:'#6aa56a',scarf:'#f2c14e',hair:'panjang',hairc:'#1b1b1b',hat:'none'},
  w:2400,h:1100,spawn:[900,1000],ground:'sawah',style:'limas',gate:'bambu',roof:'#7a5a35',roof2:'#8c6a3f',grass:'150,200,110',canopy:'#8cbf6a',path:'#e2cf9f',fl:['#f9d36b','#b7a4e3','#fff','#f4a3b5'],
  hall:'SAUNG KARSALOKA',
@@ -299,8 +301,8 @@ const REG=[
    win:[{w:'',t:'Klik! Gembok rak terbuka. Di dalamnya ada gulungan catatan nada angklung buhun.'},{w:'p',f:'senang',t:'Ketemu! Saatnya lapor ke Teh Nia.'}]}
  ]},
 
-/* ---------------- SUMATERA BARAT: kampung rumah gadang, Jam Gadang, pasar ---------------- */
-{id:'sumbar',nama:'Sumatera Barat',kasus:'Misteri Naskah Rendang Pusaka',mx:18.5,my:32.2,lb:'dn',lab:'Cari serpihan · Kuis adat',
+/* ---------------- SUMATERA BARAT ---------------- */
+{id:'sumbar',nama:'Sumatera Barat',kasus:'Misteri Naskah Rendang Pusaka',mx:13.2,my:46.5,lb:'dn',lab:'Cari serpihan · Kuis adat',
  npc:{name:'Uni Rahmi',skin:'#e8b98a',shirt:'#c0392b',scarf:'#f2c14e',hair:'hijab',hairc:'#8e1b3a',hat:'none'},
  w:2200,h:1000,spawn:[1100,880],ground:'kampung',style:'gonjong',gate:'gonjong',roof:'#8e2f2f',roof2:'#a33a3a',grass:'165,195,120',canopy:'#79ad74',path:'#ece0c6',fl:['#f4a3b5','#f9d36b','#fff','#c0392b'],
  hall:'RUMAH GADANG',
@@ -336,7 +338,12 @@ const REG=[
  ]}
 ];
 const PIECES=REG.map(r=>r.piece);
-const LOCK=[['Kalimantan',49,33.3,'dn'],['Sulawesi',68,35.7,'up'],['Papua',89,41.7,'dn']];
+/* Titik terkunci (Kalimantan, Sulawesi, Papua) disesuaikan ke gambar baru */
+const LOCK=[
+  ['Kalimantan',39.5,35.5,'dn'],
+  ['Sulawesi',56.8,44.5,'up'],
+  ['Papua',89.5,58.0,'dn']
+];
 
 /* ---------- tabrakan & interaksi ---------- */
 function blocked(x,y){
@@ -590,7 +597,7 @@ const GATE={
   }
 };
 
-/* tipe properti: sol (tabrakan), draw, ov (lapisan atas), ia (titik interaksi), rg (cincin misi) */
+/* tipe properti */
 const PT={
  npc:{sol:p=>[[p.x-14,p.y-7,28,14]],draw:p=>{const o=p.main?NPC:p.o;o.t=t;drawChar(g,p.x,p.y,o);},ia:[0,35,70,0,-68],rg:[0,-26,34,54]},
  hall:{sol:p=>{const s=p.sc||1;return [[p.x-180*s,p.y-128*s,360*s,120*s]];},draw:p=>{const s=p.sc||1;g.save();g.translate(p.x,p.y);g.scale(s,s);g.translate(-700,-343);pendopo(p);g.restore();ink(g,2.2);g.textAlign='center';},ia:[0,9,50,0,-291],rg:[0,-93,190,110]},
@@ -888,7 +895,7 @@ function gNada(T){
   setTimeout(()=>{if(ok())newRound();},500);
 }
 
-/* Mini-game: kuis budaya (opsi pertama = benar) */
+/* Mini-game: kuis budaya */
 function gKuis(T){
   const Q=T.d.qs.map(q=>({q:q[0],o:shuffle(q[1].map((x,i)=>({t:x,ok:i===0})))}));
   let qi=0;
@@ -940,7 +947,7 @@ function prolog(first){
   };
   r();
 }
-function howto(){modal('<h2>Cara Bermain</h2><p><b>Jalan:</b> WASD / Panah (HP: joystick).<br><b>Lari:</b> tahan Shift (HP: dorong joystick sampai ujung).<br><b>Interaksi:</b> Spasi / Enter / Z (HP: tombol A) saat muncul tanda <b>!</b>.</p><p>Pilih daerah di Peta, ikuti Quest Tracker dan lingkaran merah putus-putus. Tiap kasus punya 3 tahap: susun terjemahan prasasti, jawab kuis budaya untuk membuka peti, lalu lapor ke Penjaga Loka.</p><button class="btn" id="cl">Tutup</button>');$('#cl').onclick=closeM;}
+function howto(){modal('<h2>Cara Bermain</h2><p><b>Jalan:</b> WASD / Panah (HP: joystick).<br><b>Lari:</b> tahan Shift (HP: dorong joystick sampai ujung).<br><b>Interaksi:</b> Spasi / Enter / Z (HP: tombol A) saat muncul tanda <b>!</b>.</p><p>Pilih daerah di Peta, ikuti Quest Tracker dan lingkaran merah putus-putus. Selesaikan tantangan budaya di tiap daerah lalu lapor ke Penjaga Loka untuk mendapatkan Lencana Budaya.</p><button class="btn" id="cl">Tutup</button>');$('#cl').onclick=closeM;}
 
 function toMenu(){scene='ui';['#hud','#map','#card'].forEach(s=>$(s).classList.add('hide'));$('#menu').classList.remove('hide');M('menu');}
 function openCard(){$('#menu').classList.add('hide');$('#card').classList.remove('hide');$('#nama').value=cfg.name==='Detektif'?'':cfg.name;M('create');}
@@ -951,25 +958,29 @@ function toMap(){
 }
 function leaveRegion(){ST[R.id]=stage;save();toMap();}
 
-const ISL='<path d="M70,30 L125,22 L205,90 L300,172 L335,232 L292,252 L228,202 L140,122 Z"/><path d="M335,268 L420,262 L500,270 L592,276 L574,294 L480,297 L400,293 L338,286 Z"/><ellipse cx="620" cy="283" rx="17" ry="10"/><ellipse cx="656" cy="290" rx="16" ry="10"/><ellipse cx="704" cy="293" rx="26" ry="10"/><ellipse cx="790" cy="298" rx="45" ry="9"/><ellipse cx="880" cy="318" rx="36" ry="10"/><path d="M410,95 L480,62 L558,90 L585,160 L545,225 L460,228 L412,172 Z"/><path d="M650,95 L700,105 L690,140 L725,172 L705,212 L675,190 L678,152 L645,132 Z"/><ellipse cx="790" cy="125" rx="14" ry="22"/><ellipse cx="770" cy="190" rx="12" ry="10"/><path d="M815,150 L885,122 L960,140 L982,192 L932,232 L852,222 L812,192 Z"/>';
 function buildMap(){
   const dn=cnt();
   let mk='';
   REG.forEach((r,i)=>{
     const d=DONE[r.id],cl=d?'dn':'go';
-    mk+='<div class="mk" style="left:'+r.mx+'%;top:'+r.my+'%"><button class="pin '+cl+'" data-id="'+r.id+'">'+(d?'✔':(i+1))+'</button><span class="pl'+(r.lb==='up'?' up':'')+'">'+r.nama+'</span></div>';
+    mk+='<div class="mk" style="left:'+r.mx+'%;top:'+r.my+'%"><button type="button" class="pin '+cl+'" data-id="'+r.id+'">'+(d?'✔':(i+1))+'</button><span class="pl'+(r.lb==='up'?' up':'')+'">'+r.nama+'</span></div>';
   });
-  LOCK.forEach(l=>{mk+='<div class="mk" style="left:'+l[1]+'%;top:'+l[2]+'%"><button class="pin lk" data-lock="'+l[0]+'">?</button><span class="pl'+(l[3]==='up'?' up':'')+'">'+l[0]+'</span></div>';});
+  LOCK.forEach(l=>{mk+='<div class="mk" style="left:'+l[1]+'%;top:'+l[2]+'%"><button type="button" class="pin lk" data-lock="'+l[0]+'">?</button><span class="pl'+(l[3]==='up'?' up':'')+'">'+l[0]+'</span></div>';});
   const msg=REG.map(r=>DONE[r.id]?r.piece:'▒▒▒▒▒').join(' ');
   $('#mpb').innerHTML='<h2>Peta Misi Nusantara</h2><div>Pilih daerah untuk menyelidiki kasus pencurian Komplotan Bayang Sengkala. Semangat, Detektif '+esc(cfg.name)+'!</div>'+
-    '<div style="overflow-x:auto;padding:4px 0 30px"><div id="mapw" style="min-width:620px"><svg id="msvg" viewBox="0 0 1000 420"><defs><filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter></defs>'+
-    '<rect width="1000" height="420" fill="#e9f1f0"/><g fill="none" stroke="#9db8b8" stroke-width="2" stroke-linecap="round"><path d="M60 360 q10 -8 20 0 t20 0 t20 0"/><path d="M820 70 q10 -8 20 0 t20 0 t20 0"/><path d="M230 330 q10 -8 20 0 t20 0 t20 0"/><path d="M560 370 q10 -8 20 0 t20 0 t20 0"/></g>'+
-    '<g filter="url(#wob)" fill="#f6e7c1" stroke="#111" stroke-width="3" stroke-linejoin="round">'+ISL+'</g>'+
-    '<g font-family="Patrick Hand,cursive" font-size="17" fill="#111" opacity=".45"><text x="200" y="60">SUMATERA</text><text x="425" y="320">JAWA</text><text x="455" y="200">KALIMANTAN</text><text x="705" y="230">SULAWESI</text><text x="870" y="260">PAPUA</text></g></svg>'+mk+'</div></div>'+
+    '<div style="overflow-x:auto;padding:4px 0 12px"><div id="mapw" style="min-width:620px">'+
+    '<img id="mimg" src="'+MAP_IMG+'" alt="Peta Nusantara" draggable="false">'+
+    mk+'</div></div>'+
     '<div id="sandi"><b>Pesan sandi komplotan ('+dn+'/'+REG.length+'):</b><br>"'+msg+'"</div>'+
     '<p style="margin:10px 0 0"><button class="btn" id="mm">Menu Utama</button></p>';
-  $('#mpb').querySelectorAll('.pin[data-id]').forEach(b=>b.onclick=()=>{ensureAudio();brief(REG.find(r=>r.id===b.dataset.id));});
-  $('#mpb').querySelectorAll('.pin[data-lock]').forEach(b=>b.onclick=()=>{modal('<h2>'+b.dataset.lock+'</h2><p>Misi di daerah ini akan segera hadir. Selesaikan dulu kasus yang terbuka untuk mengungkap jejak Bayang Sengkala.</p><button class="btn" id="cl">Tutup</button>');$('#cl').onclick=closeM;});
+  $('#mpb').querySelectorAll('.pin[data-id]').forEach(b=>{
+    b.addEventListener('pointerdown',e=>e.stopPropagation());
+    b.onclick=e=>{e.stopPropagation();ensureAudio();brief(REG.find(r=>r.id===b.dataset.id));};
+  });
+  $('#mpb').querySelectorAll('.pin[data-lock]').forEach(b=>{
+    b.addEventListener('pointerdown',e=>e.stopPropagation());
+    b.onclick=e=>{e.stopPropagation();modal('<h2>'+b.dataset.lock+'</h2><p>Misi di daerah ini akan segera hadir. Selesaikan dulu kasus yang terbuka untuk mengungkap jejak Bayang Sengkala.</p><button class="btn" id="cl">Tutup</button>');$('#cl').onclick=closeM;};
+  });
   $('#mm').onclick=toMenu;
 }
 function brief(r){
