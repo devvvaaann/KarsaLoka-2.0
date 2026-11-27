@@ -53,7 +53,7 @@ button{font:inherit;color:#111;cursor:pointer}
 #cb h1{margin:0 0 4px;font-size:34px;line-height:1}
 #pv{width:220px;height:260px;border:4px solid #111;background:#fbf9f3;box-shadow:5px 5px 0 #111}
 #nama{font:inherit;font-size:24px;border:3px solid #111;border-radius:4px;padding:5px 10px;width:100%;background:#fffdf6;margin:8px 0}
-/* peta & tombol paku merah + pita nama daerah beranimasi */
+/* peta & tombol paku merah + pita nama daerah beranimasi (DIPERBESAR) */
 #map{position:fixed;inset:0;z-index:35;display:flex;overflow:auto;padding:10px;touch-action:pan-x pan-y}
 #mpb{width:min(1000px,98vw);padding:14px 18px;margin:auto}
 #mpb h2{margin:0;font-size:32px}
@@ -66,7 +66,7 @@ button{font:inherit;color:#111;cursor:pointer}
   left:0;top:0;
   transform:translate(-27%,-68%);
   transform-origin:27% 68%;
-  width:110px;
+  width:175px;
   background:transparent;
   border:none;
   padding:0;
@@ -103,30 +103,30 @@ button{font:inherit;color:#111;cursor:pointer}
   left:32%;
   top:42%;
   transform:translate(-50%,-50%);
-  width:17px;
-  height:17px;
+  width:26px;
+  height:26px;
   border-radius:50%;
   background:#fff;
-  border:2px solid #111;
+  border:2.5px solid #111;
   color:#111;
-  font-size:11px;
+  font-size:16px;
   font-weight:bold;
   display:flex;
   align-items:center;
   justify-content:center;
   line-height:1;
-  box-shadow:1px 1px 0 #111;
+  box-shadow:1.5px 1.5px 0 #111;
   pointer-events:none;
 }
 .pin-btn.dn .pin-badge{background:#9fd8a0}
 .pin-btn.lk .pin-badge{background:#e5e5e5;color:#555}
-/* Pita nama daerah di atas kepala paku merah */
+/* Pita nama daerah di atas kepala paku merah (DIPERBESAR) */
 .lbl-wrap{
   position:absolute;
   /* Kepala paku berada di sekitar 32% dari kiri dan 34% dari atas pada gambar pin-merah.jpeg */
   left:32%;
   top:26%;
-  width:185px;
+  width:295px;
   pointer-events:none;
   z-index:8;
   animation:ribbonFloat 2.4s ease-in-out infinite;
@@ -146,7 +146,7 @@ button{font:inherit;color:#111;cursor:pointer}
 }
 @keyframes ribbonFloat{
   0%,100%{transform:translateY(0px)}
-  50%{transform:translateY(-5px)}
+  50%{transform:translateY(-6px)}
 }
 @keyframes pinBounce{
   0%,100%{transform:scale(1)}
