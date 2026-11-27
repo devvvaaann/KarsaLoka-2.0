@@ -53,7 +53,7 @@ button{font:inherit;color:#111;cursor:pointer}
 #cb h1{margin:0 0 4px;font-size:34px;line-height:1}
 #pv{width:220px;height:260px;border:4px solid #111;background:#fbf9f3;box-shadow:5px 5px 0 #111}
 #nama{font:inherit;font-size:24px;border:3px solid #111;border-radius:4px;padding:5px 10px;width:100%;background:#fffdf6;margin:8px 0}
-/* peta & tombol paku merah + pita nama daerah beranimasi */
+/* peta, paku merah SVG & pita nama daerah beranimasi tanpa kotak putih */
 #map{position:fixed;inset:0;z-index:35;display:flex;overflow:auto;padding:10px;touch-action:pan-x pan-y}
 #mpb{width:min(1000px,98vw);padding:14px 18px;margin:auto}
 #mpb h2{margin:0;font-size:32px}
@@ -62,11 +62,12 @@ button{font:inherit;color:#111;cursor:pointer}
 .mk{position:absolute;width:0;height:0;z-index:5}
 .pin-btn{
   position:absolute;
-  /* Ujung lancip jarum paku berada di sekitar 27% dari kiri dan 68% dari atas pada gambar pin-merah.jpeg */
   left:0;top:0;
-  transform:translate(-27%,-68%);
-  transform-origin:27% 68%;
-  width:110px;
+  /* Ujung jarum paku merah ada di (10px, 44px) dalam SVG 48x48 -> pas menancap di titik mx, my */
+  transform:translate(-10px,-44px);
+  transform-origin:10px 44px;
+  width:48px;
+  height:48px;
   background:transparent;
   border:none;
   padding:0;
@@ -75,82 +76,100 @@ button{font:inherit;color:#111;cursor:pointer}
   transition:transform .22s cubic-bezier(.34,1.56,.64,1);
 }
 .pin-btn:hover,.pin-btn:focus{
-  transform:translate(-27%,-68%) scale(1.22) rotate(-4deg);
-  z-index:20;
+  transform:translate(-10px,-44px) scale(1.22) rotate(-5deg);
+  z-index:25;
 }
 .pin-btn:active{
-  transform:translate(-27%,-68%) scale(.95);
+  transform:translate(-10px,-44px) scale(.94);
 }
-.pin-btn.go .pin-img{
-  animation:pinBounce 1.4s ease-in-out infinite;
-  transform-origin:27% 68%;
-}
-.pin-btn.dn .pin-img{
-  filter:hue-rotate(115deg) saturate(1.15);
-}
-.pin-btn.lk .pin-img{
-  filter:grayscale(.85) opacity(.75);
-}
-.pin-img{
-  width:100%;
-  height:auto;
+.pin-svg{
+  width:48px;
+  height:48px;
   display:block;
-  mix-blend-mode:multiply;
-  pointer-events:none;
+  overflow:visible;
+  filter:drop-shadow(2px 3px 1px rgba(0,0,0,.35));
 }
-.pin-badge{
+.pin-btn.go .pin-svg{
+  animation:pinBounce 1.4s ease-in-out infinite;
+  transform-origin:10px 44px;
+}
+/* Pita nama daerah bergaya kertas sketsa di atas kepala paku merah */
+.ribbon-tag{
   position:absolute;
-  left:32%;
-  top:42%;
-  transform:translate(-50%,-50%);
-  width:17px;
-  height:17px;
-  border-radius:50%;
-  background:#fff;
-  border:2px solid #111;
-  color:#111;
-  font-size:11px;
+  left:26px;
+  bottom:42px;
+  transform:translateX(-50%);
+  background:linear-gradient(180deg,#fffaf0 0%,#f0e1c2 100%);
+  border:2.2px solid #2b2118;
+  border-radius:4px;
+  padding:2px 10px 3px;
+  font-family:'Patrick Hand',cursive;
+  font-size:15px;
   font-weight:bold;
+  color:#1c1610;
+  white-space:nowrap;
+  box-shadow:0 3px 0 #2b2118, 0 5px 8px rgba(0,0,0,.28);
+  pointer-events:none;
+  z-index:10;
+  animation:ribbonFloat 2.4s ease-in-out infinite;
   display:flex;
   align-items:center;
-  justify-content:center;
-  line-height:1;
-  box-shadow:1px 1px 0 #111;
-  pointer-events:none;
+  gap:5px;
 }
-.pin-btn.dn .pin-badge{background:#9fd8a0}
-.pin-btn.lk .pin-badge{background:#e5e5e5;color:#555}
-/* Pita nama daerah di atas kepala paku merah */
-.lbl-wrap{
+/* Lipatan pita kiri & kanan */
+.ribbon-tag::before,.ribbon-tag::after{
+  content:"";
   position:absolute;
-  /* Kepala paku berada di sekitar 32% dari kiri dan 34% dari atas pada gambar pin-merah.jpeg */
-  left:32%;
-  top:26%;
-  width:185px;
-  pointer-events:none;
-  z-index:8;
-  animation:ribbonFloat 2.4s ease-in-out infinite;
+  top:4px;
+  width:7px;
+  height:14px;
+  background:#d8c298;
+  border:2px solid #2b2118;
+  z-index:-1;
 }
-.lbl-img{
-  width:100%;
-  height:auto;
-  display:block;
-  mix-blend-mode:multiply;
-  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+.ribbon-tag::before{
+  left:-7px;
+  border-right:none;
+  border-radius:3px 0 0 3px;
+  clip-path:polygon(0 0,100% 0,100% 100%,0 100%,35% 50%);
 }
-.pin-btn:hover .lbl-wrap{
+.ribbon-tag::after{
+  right:-7px;
+  border-left:none;
+  border-radius:0 3px 3px 0;
+  clip-path:polygon(0 0,100% 0,65% 50%,100% 100%,0 100%);
+}
+.ribbon-num{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#d62d2d;
+  color:#fff;
+  font-size:11px;
+  border:1.5px solid #2b2118;
+  line-height:1;
+}
+.pin-btn.dn .ribbon-num{background:#2d9d47}
+.pin-btn.lk .ribbon-tag{
+  background:linear-gradient(180deg,#f5f2eb 0%,#dcd8ce 100%);
+  color:#4a463f;
+  opacity:.92;
+}
+.pin-btn.lk .ribbon-num{background:#777}
+.pin-btn:hover .ribbon-tag{
   animation-play-state:paused;
-}
-.pin-btn:hover .lbl-img{
-  transform:translateY(-4px) scale(1.12);
+  transform:translateX(-50%) translateY(-4px) scale(1.08);
 }
 @keyframes ribbonFloat{
-  0%,100%{transform:translateY(0px)}
-  50%{transform:translateY(-5px)}
+  0%,100%{transform:translateX(-50%) translateY(0px)}
+  50%{transform:translateX(-50%) translateY(-5px)}
 }
 @keyframes pinBounce{
   0%,100%{transform:scale(1)}
-  50%{transform:scale(1.08)}
+  50%{transform:scale(1.09)}
 }
 #sandi{font-family:'Courier Prime',monospace;font-size:17px;line-height:1.35}
 /* judul daerah */
@@ -229,17 +248,8 @@ body.np #js,body.np #ab{display:none!important}
 'use strict';
 /* ============================================================
    KARSALOKA: PETUALANGAN DETEKTIF BUDAYA
-   ------------------------------------------------------------
-   FILE GAMBAR PETA & PIN:
-   Pastikan file-file berikut berada sejajar dengan index.html:
-   - karsaloka-map.jpg
-   - pin-merah.jpeg
-   - label-jogja.jpeg, label-bali.jpeg, label-jabar.jpeg,
-     label-sumbar.jpeg, label-kalimantan.jpeg,
-     label-sulawesi.jpeg, label-papua.jpeg
    ============================================================ */
 const MAP_IMG = 'karsaloka-map.jpg';
-const PIN_IMG = 'pin-merah.jpeg';
 
 const CS={src:'',w:48,h:64,ay:60,scale:1,img:null,ok:false};
 (function(){if(!CS.src)return;const im=new Image();im.onload=()=>{CS.img=im;CS.ok=true;};im.src=CS.src;})();
@@ -282,15 +292,13 @@ const cnt=()=>Object.keys(DONE).filter(k=>DONE[k]).length;
 /* ============================================================
    DATA DAERAH
    mx, my = koordinat ujung jarum paku merah di atas pulau (%)
-   lbl    = file gambar pita nama daerah
-   lx, ly = offset posisi pita dalam gambarnya (agar tepat di atas kepala paku)
    ============================================================ */
 let PR=[],PID={},SOLS=[],RS={got:{},talked:{},ri:0};
 const WIT=(name,skin,shirt,hair,hairc,hat)=>({name,skin,shirt,scarf:'#f2c14e',hair,hairc,hat,npc:true,dir:'down',expr:'ramah',t:0});
 const ITM=(id,x,y,c,txt)=>({id,t:'item',x,y,c,txt,vis:()=>stage===1&&!RS.got[id]});
 const REG=[
 /* ---------------- YOGYAKARTA ---------------- */
-{id:'yogya',nama:'Yogyakarta',kasus:'Misteri Resep Wedang Uwuh Keraton',mx:34.8,my:74.2,lbl:'label-jogja.jpeg',lx:-35.5,ly:-79.5,lab:'Susun kata · Urutkan resep',
+{id:'yogya',nama:'Yogyakarta',kasus:'Misteri Resep Wedang Uwuh Keraton',mx:35.0,my:74.5,lab:'Susun kata · Urutkan resep',
  npc:{name:'Mbah Loka',skin:'#c99a6e',shirt:'#7c8aa0',scarf:'#8a5a44',hair:'pendek',hairc:'#d6d6d6',hat:'blangkon',lurik:true,stache:true},
  w:2000,h:1000,spawn:[1000,900],ground:'alun',style:'joglo',gate:'regol',roof:'#a8482f',roof2:'#b95a3a',grass:'143,184,120',canopy:'#80b077',path:'#ebe1c8',fl:['#f4a3b5','#f9d36b','#b7a4e3','#fff'],
  hall:'BALAI KARSALOKA',
@@ -322,7 +330,7 @@ const REG=[
  ]},
 
 /* ---------------- BALI ---------------- */
-{id:'bali',nama:'Bali',kasus:'Misteri Naskah Lontar Usada',mx:46.8,my:76.5,lbl:'label-bali.jpeg',lx:-46.5,ly:-60.5,lab:'Pasangkan arah · Jalur doa',
+{id:'bali',nama:'Bali',kasus:'Misteri Naskah Lontar Usada',mx:46.8,my:76.5,lab:'Pasangkan arah · Jalur doa',
  npc:{name:'Bli Made',skin:'#d9a066',shirt:'#f2f2f2',scarf:'#f2c14e',hair:'pendek',hairc:'#1b1b1b',hat:'udeng'},
  w:2400,h:1000,spawn:[1200,900],ground:'pura',style:'bale',gate:'bentar',roof:'#6b5a3a',roof2:'#7d6a45',grass:'120,190,140',canopy:'#6fae8a',path:'#e8dcc0',fl:['#fff','#f9d36b','#fff','#f4a3b5'],
  hall:'BALE BANJAR',
@@ -359,7 +367,7 @@ const REG=[
  ]},
 
 /* ---------------- JAWA BARAT ---------------- */
-{id:'jabar',nama:'Jawa Barat',kasus:'Misteri Nada Angklung Buhun',mx:27.5,my:69.5,lbl:'label-jabar.jpeg',lx:-22.0,ly:-71.5,lab:'Wawancara saksi · Nada angklung',
+{id:'jabar',nama:'Jawa Barat',kasus:'Misteri Nada Angklung Buhun',mx:27.5,my:69.5,lab:'Wawancara saksi · Nada angklung',
  npc:{name:'Teh Nia',skin:'#e8b98a',shirt:'#6aa56a',scarf:'#f2c14e',hair:'panjang',hairc:'#1b1b1b',hat:'none'},
  w:2400,h:1100,spawn:[900,1000],ground:'sawah',style:'limas',gate:'bambu',roof:'#7a5a35',roof2:'#8c6a3f',grass:'150,200,110',canopy:'#8cbf6a',path:'#e2cf9f',fl:['#f9d36b','#b7a4e3','#fff','#f4a3b5'],
  hall:'SAUNG KARSALOKA',
@@ -395,7 +403,7 @@ const REG=[
  ]},
 
 /* ---------------- SUMATERA BARAT ---------------- */
-{id:'sumbar',nama:'Sumatera Barat',kasus:'Misteri Naskah Rendang Pusaka',mx:13.2,my:46.5,lbl:'label-sumbar.jpeg',lx:-18.5,ly:-32.5,lab:'Cari serpihan · Kuis adat',
+{id:'sumbar',nama:'Sumatera Barat',kasus:'Misteri Naskah Rendang Pusaka',mx:13.2,my:46.5,lab:'Cari serpihan · Kuis adat',
  npc:{name:'Uni Rahmi',skin:'#e8b98a',shirt:'#c0392b',scarf:'#f2c14e',hair:'hijab',hairc:'#8e1b3a',hat:'none'},
  w:2200,h:1000,spawn:[1100,880],ground:'kampung',style:'gonjong',gate:'gonjong',roof:'#8e2f2f',roof2:'#a33a3a',grass:'165,195,120',canopy:'#79ad74',path:'#ece0c6',fl:['#f4a3b5','#f9d36b','#fff','#c0392b'],
  hall:'RUMAH GADANG',
@@ -431,11 +439,10 @@ const REG=[
  ]}
 ];
 const PIECES=REG.map(r=>r.piece);
-/* Titik terkunci (Kalimantan, Sulawesi, Papua) dengan posisi pita label masing-masing */
 const LOCK=[
-  {nama:'Kalimantan',mx:39.5,my:37.5,lbl:'label-kalimantan.jpeg',lx:-41.8,ly:-28.5},
-  {nama:'Sulawesi',mx:56.8,my:44.5,lbl:'label-sulawesi.jpeg',lx:-63.0,ly:-42.5},
-  {nama:'Papua',mx:89.5,my:58.0,lbl:'label-papua.jpeg',lx:-91.0,ly:-59.5}
+  {nama:'Kalimantan',mx:39.5,my:37.5},
+  {nama:'Sulawesi',mx:56.8,my:44.5},
+  {nama:'Papua',mx:89.5,my:58.0}
 ];
 
 /* ---------- tabrakan & interaksi ---------- */
@@ -1051,6 +1058,24 @@ function toMap(){
 }
 function leaveRegion(){ST[R.id]=stage;save();toMap();}
 
+/* SVG Paku Merah Sketsa (ujung jarum tepat di titik x=10, y=44) */
+function pinSVG(type){
+  const head = type==='dn' ? '#36b355' : (type==='lk' ? '#8c8c8c' : '#e03131');
+  const top  = type==='dn' ? '#69db7c' : (type==='lk' ? '#b8b8b8' : '#ff6b6b');
+  return '<svg class="pin-svg" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">'+
+    /* Jarum logam */
+    '<polygon points="10,44 19,29 23,32" fill="#d8dee9" stroke="#111" stroke-width="2" stroke-linejoin="round"/>'+
+    /* Badan bawah kepala paku */
+    '<ellipse cx="26" cy="24" rx="11" ry="8" transform="rotate(-38 26 24)" fill="'+head+'" stroke="#111" stroke-width="2.2"/>'+
+    /* Leher paku */
+    '<path d="M21,19 L27,13 L35,21 L29,27 Z" fill="'+head+'" stroke="#111" stroke-width="2" stroke-linejoin="round"/>'+
+    /* Tutup atas kepala paku */
+    '<ellipse cx="32" cy="16" rx="10" ry="6.5" transform="rotate(-38 32 16)" fill="'+top+'" stroke="#111" stroke-width="2.2"/>'+
+    /* Kilau putih kecil */
+    '<ellipse cx="30" cy="13" rx="3.2" ry="1.5" transform="rotate(-38 30 13)" fill="#fff" opacity=".85"/>'+
+  '</svg>';
+}
+
 function buildMap(){
   const dn=cnt();
   let mk='';
@@ -1058,11 +1083,10 @@ function buildMap(){
     const d=DONE[r.id],cl=d?'dn':'go',delay=(i*0.35).toFixed(2);
     mk+='<div class="mk" style="left:'+r.mx+'%;top:'+r.my+'%">'+
       '<button type="button" class="pin-btn '+cl+'" data-id="'+r.id+'" title="Selidiki '+r.nama+'">'+
-        '<img src="'+PIN_IMG+'" alt="Pin '+r.nama+'" class="pin-img" draggable="false">'+
-        '<span class="pin-badge">'+(d?'✔':(i+1))+'</span>'+
-        '<div class="lbl-wrap" style="animation-delay:'+delay+'s">'+
-          '<img src="'+r.lbl+'" alt="'+r.nama+'" class="lbl-img" style="transform:translate('+r.lx+'%,'+r.ly+'%)" draggable="false">'+
-        '</div>'+
+        pinSVG(cl)+
+        '<span class="ribbon-tag" style="animation-delay:'+delay+'s">'+
+          '<span class="ribbon-num">'+(d?'✔':(i+1))+'</span>'+esc(r.nama)+
+        '</span>'+
       '</button>'+
     '</div>';
   });
@@ -1070,11 +1094,10 @@ function buildMap(){
     const delay=((i+4)*0.35).toFixed(2);
     mk+='<div class="mk" style="left:'+l.mx+'%;top:'+l.my+'%">'+
       '<button type="button" class="pin-btn lk" data-lock="'+l.nama+'" title="'+l.nama+' (Segera Hadir)">'+
-        '<img src="'+PIN_IMG+'" alt="Pin '+l.nama+'" class="pin-img" draggable="false">'+
-        '<span class="pin-badge">?</span>'+
-        '<div class="lbl-wrap" style="animation-delay:'+delay+'s">'+
-          '<img src="'+l.lbl+'" alt="'+l.nama+'" class="lbl-img" style="transform:translate('+l.lx+'%,'+l.ly+'%)" draggable="false">'+
-        '</div>'+
+        pinSVG('lk')+
+        '<span class="ribbon-tag" style="animation-delay:'+delay+'s">'+
+          '<span class="ribbon-num">?</span>'+esc(l.nama)+
+        '</span>'+
       '</button>'+
     '</div>';
   });
