@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:#f6f3eb;overflow:hidden;font-family:'Patrick Hand','Comic Sans MS',cursive;color:#111;touch-action:none;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overscroll-behavior:none;background:#f6f3eb;overflow:hidden;font-family:'Patrick Hand','Comic Sans MS',cursive;color:#111;touch-action:none;user-select:none;-webkit-user-select:none}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block}
 body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;background:radial-gradient(ellipse at center,transparent 55%,rgba(70,45,20,.2))}
 .box{background:#fff;border:4px solid #111;border-radius:6px;box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 5px #111,8px 8px 0 #111}
@@ -20,7 +20,7 @@ button{font:inherit;color:#111;cursor:pointer}
 .btn.sel::before{content:"▶ "}
 .btn.sm{font-size:18px;padding:2px 10px;margin:3px}
 .btn.big{font-size:27px;padding:8px 26px;min-width:270px}
-#hud{position:fixed;left:12px;top:12px;max-width:min(350px,72vw);padding:12px 16px;z-index:10;font-size:19px;line-height:1.2}
+#hud{position:fixed;left:calc(12px + env(safe-area-inset-left));top:calc(12px + env(safe-area-inset-top));max-width:min(350px,72vw);padding:12px 16px;z-index:10;font-size:19px;line-height:1.2}
 #hud .t{font-size:21px;font-weight:bold;border-bottom:2px dashed #111;margin-bottom:4px}
 #hud small{display:block;opacity:.65;font-size:15px;margin:4px 0 6px}
 #dlg{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(880px,94vw);z-index:20;display:flex;gap:14px;padding:16px;min-height:140px}
@@ -74,12 +74,16 @@ button{font:inherit;color:#111;cursor:pointer}
 #rt b{font-size:clamp(30px,8vw,54px);display:block;line-height:1}
 @keyframes rt{0%{opacity:0;transform:translate(-50%,-12px)}15%,78%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,0)}}
 /* kontrol sentuh */
-#ab{position:fixed;right:18px;bottom:calc(30px + env(safe-area-inset-bottom));width:74px;height:74px;border-radius:50%;display:none;z-index:9;font-size:30px}
+#ab{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(30px + env(safe-area-inset-bottom));width:74px;height:74px;border-radius:50%;display:none;z-index:9;font-size:30px}
 #js{display:none}
 @media (pointer:coarse),(max-width:820px){#js{display:block}#ab{display:block}#hud small{display:none}}
 body.np #js,body.np #ab{display:none!important}
-#js,#ab,.btn,.pin{touch-action:none;-webkit-touch-callout:none}
-#js{position:fixed;left:22px;bottom:calc(22px + env(safe-area-inset-bottom));width:150px;height:150px;border:4px solid #111;border-radius:50%;background:rgba(255,255,255,.75);box-shadow:5px 5px 0 #111,inset 0 0 0 3px #fff,inset 0 0 0 5px #111;z-index:9}
+#js,#ab{touch-action:none}
+.btn,.pin{touch-action:manipulation}
+#js,#ab,.btn,.pin{-webkit-touch-callout:none}
+#nama{user-select:text;-webkit-user-select:text}
+@media (pointer:coarse){.btn.sm{padding:8px 18px;font-size:20px}}
+#js{position:fixed;left:calc(22px + env(safe-area-inset-left));bottom:calc(22px + env(safe-area-inset-bottom));width:150px;height:150px;border:4px solid #111;border-radius:50%;background:rgba(255,255,255,.75);box-shadow:5px 5px 0 #111,inset 0 0 0 3px #fff,inset 0 0 0 5px #111;z-index:9}
 #kn{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border:4px solid #111;border-radius:50%;background:#fff;box-shadow:3px 3px 0 #111;pointer-events:none}
 
 .btn.ok{background:#9fd8a0}
@@ -106,7 +110,7 @@ body.np #js,body.np #ab{display:none!important}
     <div>
       <h1>Kartu Detektif KarsaLoka</h1>
       <div style="font-size:19px">Tulis namamu, Detektif!</div>
-      <input id="nama" maxlength="14" placeholder="Nama detektif..." autocomplete="off">
+      <input id="nama" maxlength="14" placeholder="Nama detektif..." autocomplete="off" autocapitalize="words" enterkeyhint="go">
       <button class="btn" id="go">Lanjut ▶</button>
     </div>
   </div>
@@ -449,7 +453,7 @@ setInterval(()=>{boil.x=(Math.random()-.5)*2.4;boil.y=(Math.random()-.5)*2.4;boi
 /* ============================================================
    LATAR STATIS PER DAERAH
    ============================================================ */
-const bg=document.createElement('canvas');bg.width=WW;bg.height=WH;
+const bg=document.createElement('canvas');let BS=1;bg.width=WW;bg.height=WH;
 function plaza(b,x,y,w,h,f,dx,dy){
   b.fillStyle=f;b.beginPath();b.roundRect(x,y,w,h,10);b.fill();b.strokeStyle='rgba(60,60,50,.5)';b.lineWidth=1.6;b.stroke();
   b.lineWidth=1.1;b.strokeStyle='rgba(60,60,50,.33)';let k=0;
@@ -461,8 +465,8 @@ function lampBG(b,x,y){
   b.beginPath();b.moveTo(x-9,y-24);b.lineTo(x,y-33);b.lineTo(x+9,y-24);b.closePath();b.fillStyle='#bdb7a6';b.fill();b.stroke();
 }
 function buildBG(r){
-  WW=r.w;WH=r.h;bg.width=WW;bg.height=WH;
-  const b=bg.getContext('2d');let s=11;const RN=()=>(s=(s*16807)%2147483647)/2147483647;
+  WW=r.w;WH=r.h;BS=Math.min(2,Math.sqrt(1.2e7/(WW*WH)));bg.width=Math.round(WW*BS);bg.height=Math.round(WH*BS);
+  const b=bg.getContext('2d');b.setTransform(BS,0,0,BS,0,0);let s=11;const RN=()=>(s=(s*16807)%2147483647)/2147483647;
   const A=WW*WH/1e6;
   b.fillStyle='#f6f3eb';b.fillRect(0,0,WW,WH);
   b.strokeStyle='rgba(120,90,50,.07)';b.lineWidth=1;
@@ -636,13 +640,13 @@ function render(dt){
   if(cam.s){cam.x=tx;cam.y=ty;cam.s=0;}else{const k=Math.min(1,dt*6);cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;}
   g.setTransform(DPR,0,0,DPR,0,0);g.fillStyle='#f6f3eb';g.fillRect(0,0,W,H);
   g.setTransform(DPR*Z,0,0,DPR*Z,-cam.x*DPR*Z,-cam.y*DPR*Z);
-  g.drawImage(bg,0,0);ink(g,2.2);g.textAlign='center';
+  g.drawImage(bg,0,0,WW,WH);ink(g,2.2);g.textAlign='center';
   Object.assign(PL,cfg,{dir:P.dir,moving:P.moving,t:P.t,expr:'ramah'});
   const E=[];
-  for(const p of PR){if(p.vis&&!p.vis())continue;const d=PT[p.t];E.push([p.by!==undefined?p.by:p.y,()=>d.draw(p)]);}
+  for(const p of PR){if(p.vis&&!p.vis())continue;if(p.x+(p.w||0)<cam.x-320||p.x>cam.x+vw+320||p.y<cam.y-60||p.y>cam.y+vh+340)continue;const d=PT[p.t];E.push([p.by!==undefined?p.by:p.y,()=>d.draw(p)]);}
   E.push([P.y,()=>drawChar(g,P.x,P.y,PL)]);
   E.sort((a,b)=>a[0]-b[0]);E.forEach(e=>e[1]());
-  for(const p of PR){const d=PT[p.t];if(d.ov&&(!p.vis||p.vis()))d.ov(p);}
+  for(const p of PR){const d=PT[p.t];if(d.ov&&(!p.vis||p.vis())&&p.x>cam.x-320&&p.x<cam.x+vw+320&&p.y>cam.y-60&&p.y<cam.y+vh+340)d.ov(p);}
   for(const id of tgtIds()){
     const p=PID[id];if(!p)continue;const rg=p.rg||PT[p.t].rg;
     g.save();g.strokeStyle='#d62d2d';g.lineWidth=3;g.setLineDash([9,7]);g.lineDashOffset=-t*18;g.beginPath();g.ellipse(p.x+rg[0],p.y+rg[1],rg[2],rg[3],0,0,7);g.stroke();g.restore();
@@ -958,10 +962,10 @@ function buildMap(){
   LOCK.forEach(l=>{mk+='<div class="mk" style="left:'+l[1]+'%;top:'+l[2]+'%"><button class="pin lk" data-lock="'+l[0]+'">?</button><span class="pl'+(l[3]==='up'?' up':'')+'">'+l[0]+'</span></div>';});
   const msg=REG.map(r=>DONE[r.id]?r.piece:'▒▒▒▒▒').join(' ');
   $('#mpb').innerHTML='<h2>Peta Misi Nusantara</h2><div>Pilih daerah untuk menyelidiki kasus pencurian Komplotan Bayang Sengkala. Semangat, Detektif '+esc(cfg.name)+'!</div>'+
-    '<div id="mapw"><svg id="msvg" viewBox="0 0 1000 420"><defs><filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter></defs>'+
+    '<div style="overflow-x:auto;padding:4px 0 30px"><div id="mapw" style="min-width:620px"><svg id="msvg" viewBox="0 0 1000 420"><defs><filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter></defs>'+
     '<rect width="1000" height="420" fill="#e9f1f0"/><g fill="none" stroke="#9db8b8" stroke-width="2" stroke-linecap="round"><path d="M60 360 q10 -8 20 0 t20 0 t20 0"/><path d="M820 70 q10 -8 20 0 t20 0 t20 0"/><path d="M230 330 q10 -8 20 0 t20 0 t20 0"/><path d="M560 370 q10 -8 20 0 t20 0 t20 0"/></g>'+
     '<g filter="url(#wob)" fill="#f6e7c1" stroke="#111" stroke-width="3" stroke-linejoin="round">'+ISL+'</g>'+
-    '<g font-family="Patrick Hand,cursive" font-size="17" fill="#111" opacity=".45"><text x="200" y="60">SUMATERA</text><text x="425" y="320">JAWA</text><text x="455" y="200">KALIMANTAN</text><text x="705" y="230">SULAWESI</text><text x="870" y="260">PAPUA</text></g></svg>'+mk+'</div>'+
+    '<g font-family="Patrick Hand,cursive" font-size="17" fill="#111" opacity=".45"><text x="200" y="60">SUMATERA</text><text x="425" y="320">JAWA</text><text x="455" y="200">KALIMANTAN</text><text x="705" y="230">SULAWESI</text><text x="870" y="260">PAPUA</text></g></svg>'+mk+'</div></div>'+
     '<div id="sandi"><b>Pesan sandi komplotan ('+dn+'/'+REG.length+'):</b><br>"'+msg+'"</div>'+
     '<p style="margin:10px 0 0"><button class="btn" id="mm">Menu Utama</button></p>';
   $('#mpb').querySelectorAll('.pin[data-id]').forEach(b=>b.onclick=()=>{ensureAudio();brief(REG.find(r=>r.id===b.dataset.id));});
@@ -1053,6 +1057,8 @@ $('#go').onclick=()=>{
   save();toMap();
   if(!PRO){PRO=true;save();prolog(true);}
 };
+$('#nama').addEventListener('keydown',e=>{if(e.key==='Enter')$('#go').click();});
+document.addEventListener('contextmenu',e=>{if(e.target.tagName!=='INPUT')e.preventDefault();});
 $('#mp').onclick=()=>{if(mode==='play')leaveRegion();};
 
 /* ============================================================
